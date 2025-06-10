@@ -20,6 +20,9 @@ pub struct Flock2D {
     target: Option<Gd<Node2D>>,
     pub boids: FxIndexMap<InstanceId, Gd<Boid2D>>,
     base: Base<Node2D>,
+    #[export]
+    #[init(val = true)]
+    boid_processing_enabled: bool,
 }
 
 impl Flock2D {
@@ -66,6 +69,16 @@ impl Flock2D {
     pub fn get_id(&self) -> InstanceId {
         self.base().instance_id()
     }
+
+    #[func]
+    pub fn set_boid_process(&mut self, enabled: bool) {
+        self.boid_processing_enabled = enabled;
+    }
+
+    #[func]
+    pub fn boid_processing_enabled(&self) -> bool {
+        self.boid_processing_enabled
+    }
 }
 
 impl Flock for Flock2D {
@@ -107,4 +120,10 @@ impl Flock for Flock2D {
             )
         })
     }
+    
+    #[inline(always)]
+    fn is_boid_processing(&self) -> bool {
+        self.boid_processing_enabled
+    }
 }
+

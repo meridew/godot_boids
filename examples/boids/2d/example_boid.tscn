@@ -3,6 +3,8 @@
 [ext_resource type="Texture2D" uid="uid://rk5u1wthr0n0" path="res://examples/boids/2d/example_boid.svg" id="2_jx2vb"]
 
 [sub_resource type="BoidProperties" id="BoidProperties_a6wou"]
+resource_local_to_scene = false
+resource_name = ""
 alignment = 1.0
 cohesion = 0.8
 

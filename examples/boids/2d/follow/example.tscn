@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://ckc0dhvrksfh4"]
 
-[ext_resource type="Script" path="res://examples/boids/2d/follow/example.gd" id="1_cb4mx"]
+[ext_resource type="Script" uid="uid://7c6402rd1yl3" path="res://examples/boids/2d/follow/example.gd" id="1_cb4mx"]
 
 [sub_resource type="Curve2D" id="Curve2D_ncwi0"]
 _data = {
@@ -21,6 +21,8 @@ _data = {
 point_count = 7
 
 [sub_resource type="FlockProperties" id="FlockProperties_id14j"]
+resource_local_to_scene = false
+resource_name = ""
 
 [sub_resource type="Environment" id="Environment_8ucif"]
 background_mode = 3

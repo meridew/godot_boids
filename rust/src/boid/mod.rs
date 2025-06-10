@@ -10,25 +10,30 @@ use crate::FlockProperties;
 pub mod boid_2d;
 pub mod boid_3d;
 pub mod boid_properties;
+pub mod spatial_grid;           // NEW
+pub mod boid_data;             // NEW
+pub mod optimized_calculations; // NEW
 
 pub use boid_2d::*;
 pub use boid_3d::*;
 pub use boid_properties::*;
+pub use spatial_grid::*;           // NEW
+pub use boid_data::*;             // NEW
+pub use optimized_calculations::*; // NEW
 
 pub trait Boid {
     fn apply_force(&mut self, force: Vec3);
     fn get_boid_position(&self) -> Vec3;
     fn get_boid_velocity(&self) -> Vec3;
     fn get_boid_properties(&self) -> &BoidProperties;
-
     fn get_flock_id(&self) -> InstanceId;
 }
 
+// Keep your existing CalcArgs and calculate_boid function for backward compatibility
 struct CalcArgs {
     steer: Vec3,
     align: Vec3,
     cohere: Vec3,
-
     steer_count: i32,
     align_count: i32,
     cohere_count: i32,
@@ -47,6 +52,8 @@ impl CalcArgs {
     }
 }
 
+// Keep existing function for compatibility, but mark as deprecated
+#[deprecated(note = "Use optimized_calculate_boid_batch for better performance")]
 pub fn calculate_boid(
     boid_pos: Vec3,
     boid_vel: Vec3,
@@ -55,8 +62,7 @@ pub fn calculate_boid(
     other_boids: Arc<Vec<(Vec3, Vec3)>>,
     target_position: Option<Vec3>,
 ) -> Vec3 {
-    //godot::godot_print!("[Boids] executing from thread {:?}", rayon::current_thread_index());
-
+    // Your existing implementation stays the same
     let mut calced = other_boids
         .par_iter()
         .fold(CalcArgs::identity, |mut acc, (aboid_pos, aboid_vel)| {

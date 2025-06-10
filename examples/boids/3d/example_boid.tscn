@@ -3,6 +3,8 @@
 [ext_resource type="PackedScene" uid="uid://bqklv2qo52yic" path="res://examples/boids/3d/example_boid.blend" id="1_4juxv"]
 
 [sub_resource type="BoidProperties" id="BoidProperties_en2py"]
+resource_local_to_scene = false
+resource_name = ""
 max_speed = 0.2
 max_force = 0.04
 
