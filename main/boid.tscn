@@ -3,6 +3,12 @@
 [ext_resource type="Script" uid="uid://cbjomgme4nl7l" path="res://main/boid.gd" id="1_wl6y3"]
 
 [sub_resource type="BoidProperties" id="BoidProperties_wl6y3"]
+max_speed = 0.4
+max_force = 0.1
+alignment = 0.15
+cohesion = 0.1
+seperation = 0.12
+targeting = 0.08
 
 [sub_resource type="BoxMesh" id="BoxMesh_38451"]
 

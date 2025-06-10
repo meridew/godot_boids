@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://dh2f8xe680qt"]
+[gd_scene load_steps=9 format=3 uid="uid://dh2f8xe680qt"]
 
 [ext_resource type="Script" uid="uid://caui6jfgcvhyn" path="res://main/main.gd" id="1_pjrb6"]
 [ext_resource type="Script" uid="uid://bquxtbnni84rr" path="res://main/boids.gd" id="2_xwkvk"]
@@ -21,6 +21,8 @@ size = Vector2(10000, 10000)
 
 [sub_resource type="FlockProperties" id="FlockProperties_pjrb6"]
 
+[sub_resource type="FlockProperties" id="FlockProperties_xwkvk"]
+
 [node name="Main" type="Node3D"]
 script = ExtResource("1_pjrb6")
 
@@ -41,6 +43,7 @@ target = NodePath("../Marker3D")
 script = ExtResource("2_xwkvk")
 
 [node name="Flock2" type="Flock3D" parent="." node_paths=PackedStringArray("target")]
+properties = SubResource("FlockProperties_xwkvk")
 target = NodePath("../Marker3D")
 
 [node name="Marker3D" type="Marker3D" parent="."]

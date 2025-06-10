@@ -1,17 +1,15 @@
 use glam::*;
-use godot::{
-    classes::Engine,
-    prelude::*,
-};
+use godot::{classes::Engine, prelude::*};
 use indexmap::IndexMap;
+use rustc_hash::FxBuildHasher;
 
+mod algorithms;
 mod boid;
 mod flock;
 
-pub use boid::{Boid, *};
-pub use flock::{Flock, *};
-
-use rustc_hash::FxBuildHasher;
+pub use algorithms::*;
+pub use boid::*;
+pub use flock::*;
 
 type FxIndexMap<K, V> = IndexMap<K, V, FxBuildHasher>;
 
@@ -97,14 +95,13 @@ struct Boids {
     flocks3d: FxIndexMap<InstanceId, Gd<Flock3D>>,
     #[init(val = FxIndexMap::default())]
     boids3d: FxIndexMap<InstanceId, Gd<Boid3D>>,
-    #[init(val = BoidData::with_capacity(1000))]
-    boid_data_2d: BoidData,
-    #[init(val = SpatialGrid::new(50.0))]
-    spatial_grid_2d: SpatialGrid,
-    #[init(val = BoidData::with_capacity(1000))]
-    boid_data_3d: BoidData,
-    #[init(val = SpatialGrid::new(5.0))]
-    spatial_grid_3d: SpatialGrid,
+    
+    // Ultra-performance processors
+    #[init(val = UltraBoidProcessor::new(15000, 75.0))]
+    processor_2d: UltraBoidProcessor,
+    #[init(val = UltraBoidProcessor::new(15000, 50.0))]
+    processor_3d: UltraBoidProcessor,
+    
     base: Base<Object>,
 }
 
@@ -148,12 +145,32 @@ impl Boids {
 impl Boids {
     #[func]
     fn process_boids_2d(&mut self) {
-        process_boids_optimized_2d(&mut self.boids2d, &self.flocks2d, &mut self.boid_data_2d, &mut self.spatial_grid_2d)
+        process_boids_ultra_2d(&mut self.boids2d, &self.flocks2d, &mut self.processor_2d);
     }
 
     #[func]
     fn process_boids_3d(&mut self) {
-        process_boids_optimized_3d(&mut self.boids3d, &self.flocks3d, &mut self.boid_data_3d, &mut self.spatial_grid_3d)
+        process_boids_ultra_3d(&mut self.boids3d, &self.flocks3d, &mut self.processor_3d);
+    }
+
+    #[func]
+    fn get_total_boid_2d_count(&self) -> i64 {
+        self.boids2d.len() as i64
+    }
+
+    #[func]
+    fn get_total_flock_2d_count(&self) -> i64 {
+        self.flocks2d.len() as i64
+    }
+
+    #[func]
+    fn get_total_boid_3d_count(&self) -> i64 {
+        self.boids3d.len() as i64
+    }
+
+    #[func]
+    fn get_total_flock_3d_count(&self) -> i64 {
+        self.flocks3d.len() as i64
     }
 }
 
@@ -162,70 +179,88 @@ const fn to_glam_vec(godot_vec: Vector3) -> Vec3 {
     vec3(godot_vec.x, godot_vec.y, godot_vec.z)
 }
 
-fn process_boids_optimized_2d(
+// Ultra-performance processing functions
+fn process_boids_ultra_2d(
     boids: &mut FxIndexMap<InstanceId, Gd<Boid2D>>,
     flocks: &FxIndexMap<InstanceId, Gd<Flock2D>>,
-    boid_data: &mut BoidData,
-    spatial_grid: &mut SpatialGrid,
+    processor: &mut UltraBoidProcessor,
 ) {
-    boid_data.clear();
-    let mut boid_ids = Vec::new();
+    if flocks.is_empty() { return; }
+    
+    // Collect all boids into algorithm-friendly format
+    let mut boid_instances = Vec::with_capacity(boids.len());
+    let mut boid_ids = Vec::with_capacity(boids.len());
+    let mut flock_props = None;
+    let mut target_pos = None;
     
     for (_, flock) in flocks.iter() {
         let flock = flock.bind();
         if !flock.is_boid_processing() { continue; }
         
-        let target_position = flock.get_target_position();
-        for (boid_id, (pos, vel, props)) in flock.get_boids() {
-            boid_data.add_boid(pos, vel, &props);
-            boid_ids.push(*boid_id);
+        // For simplicity, use first flock's properties
+        // (you can extend this for multiple flocks)
+        if flock_props.is_none() {
+            flock_props = Some(flock.get_flock_properties().clone());
+            target_pos = flock.get_target_position();
         }
         
-        if boid_data.count > 0 {
-            process_boids_2d_optimized(boid_data, spatial_grid, flock.get_flock_properties(), target_position);
+        for (boid_id, (pos, vel, props)) in flock.get_boids() {
+            boid_instances.push(BoidInstance::new(pos, vel, props));
+            boid_ids.push(*boid_id);
         }
     }
     
+    if boid_instances.is_empty() { return; }
+    
+    // Process with ultra-performance algorithm
+    if let Some(props) = flock_props {
+        processor.process_boids(&mut boid_instances, &props, target_pos);
+    }
+    
+    // Apply forces back to Godot objects
     for (i, boid_id) in boid_ids.iter().enumerate() {
-        if i < boid_data.count {
-            let force = boid_data.get_force(i);
-            if let Some(boid) = boids.get_mut(boid_id) {
-                boid.bind_mut().apply_force(force);
-            }
+        if let Some(boid) = boids.get_mut(boid_id) {
+            boid.bind_mut().apply_force(boid_instances[i].force);
         }
     }
 }
 
-fn process_boids_optimized_3d(
+fn process_boids_ultra_3d(
     boids: &mut FxIndexMap<InstanceId, Gd<Boid3D>>,
     flocks: &FxIndexMap<InstanceId, Gd<Flock3D>>,
-    boid_data: &mut BoidData,
-    spatial_grid: &mut SpatialGrid,
+    processor: &mut UltraBoidProcessor,
 ) {
-    boid_data.clear();
-    let mut boid_ids = Vec::new();
+    if flocks.is_empty() { return; }
+    
+    let mut boid_instances = Vec::with_capacity(boids.len());
+    let mut boid_ids = Vec::with_capacity(boids.len());
+    let mut flock_props = None;
+    let mut target_pos = None;
     
     for (_, flock) in flocks.iter() {
         let flock = flock.bind();
         if !flock.is_boid_processing() { continue; }
         
-        let target_position = flock.get_target_position();
-        for (boid_id, (pos, vel, props)) in flock.get_boids() {
-            boid_data.add_boid(pos, vel, &props);
-            boid_ids.push(*boid_id);
+        if flock_props.is_none() {
+            flock_props = Some(flock.get_flock_properties().clone());
+            target_pos = flock.get_target_position();
         }
         
-        if boid_data.count > 0 {
-            process_boids_optimized(boid_data, spatial_grid, flock.get_flock_properties(), target_position);
+        for (boid_id, (pos, vel, props)) in flock.get_boids() {
+            boid_instances.push(BoidInstance::new(pos, vel, props));
+            boid_ids.push(*boid_id);
         }
     }
     
+    if boid_instances.is_empty() { return; }
+    
+    if let Some(props) = flock_props {
+        processor.process_boids(&mut boid_instances, &props, target_pos);
+    }
+    
     for (i, boid_id) in boid_ids.iter().enumerate() {
-        if i < boid_data.count {
-            let force = boid_data.get_force(i);
-            if let Some(boid) = boids.get_mut(boid_id) {
-                boid.bind_mut().apply_force(force);
-            }
+        if let Some(boid) = boids.get_mut(boid_id) {
+            boid.bind_mut().apply_force(boid_instances[i].force);
         }
     }
 }
