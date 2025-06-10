@@ -50,7 +50,6 @@ fn calculate_chunk_forces(
     
     for i in start..end {
         let pos = boid_data.get_position(i);
-        let vel = boid_data.get_velocity(i);
         
         // Get maximum influence radius for spatial queries
         let max_radius = f32::max(

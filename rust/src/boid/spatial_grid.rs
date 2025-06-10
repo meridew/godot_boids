@@ -13,6 +13,12 @@ pub struct SpatialGrid {
     grid: FxHashMap<GridCell, Vec<usize>>, // boid indices
 }
 
+impl Default for SpatialGrid {
+    fn default() -> Self {
+        Self::new(50.0)
+    }
+}
+
 impl SpatialGrid {
     pub fn new(cell_size: f32) -> Self {
         Self {

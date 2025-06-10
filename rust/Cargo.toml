@@ -26,5 +26,7 @@ opt-level = 3
 
 [profile.release]
 opt-level = 3
+lto = "fat"           # Better than "thin"
+codegen-units = 1     # Better optimization at cost of compile time
+panic = "abort"       # Smaller binary, faster execution
 strip = "debuginfo"
-lto = "thin"

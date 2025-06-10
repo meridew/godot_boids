@@ -5,7 +5,7 @@ const area := Vector3(4.0, 4.0, 4.0)
 func _ready() -> void:
 	for flock in get_children():
 		if flock is not Flock3D: continue
-		for i in 20: spawnBoid(flock)
+		for i in 2000: spawnBoid(flock)
 	DebugCam.add_debug_cam(self)
 
 func spawnBoid(flock: Flock3D) -> void:

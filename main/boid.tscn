@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://c21hlo112gknw"]
+
+[ext_resource type="Script" uid="uid://cbjomgme4nl7l" path="res://main/boid.gd" id="1_wl6y3"]
+
+[sub_resource type="BoidProperties" id="BoidProperties_wl6y3"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_38451"]
+
+[node name="Boid" type="Boid3D"]
+properties = SubResource("BoidProperties_wl6y3")
+script = ExtResource("1_wl6y3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_38451")

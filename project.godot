@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Boid Addon"
-run/main_scene="res://examples/boids/2d/simple/example.tscn"
+run/main_scene="uid://dh2f8xe680qt"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 
 [autoload]

@@ -1,29 +1,23 @@
 use glam::*;
 use super::BoidProperties;
 
-// Structure of Arrays for better cache performance
 #[derive(Default)]
 pub struct BoidData {
-    // Separate arrays for each component - much better for SIMD and cache
     pub positions_x: Vec<f32>,
     pub positions_y: Vec<f32>, 
     pub positions_z: Vec<f32>,
-    
     pub velocities_x: Vec<f32>,
     pub velocities_y: Vec<f32>,
     pub velocities_z: Vec<f32>,
-    
     pub max_speeds: Vec<f32>,
     pub max_forces: Vec<f32>,
     pub separations: Vec<f32>,
     pub alignments: Vec<f32>,
     pub cohesions: Vec<f32>,
     pub targetings: Vec<f32>,
-    
-    pub forces_x: Vec<f32>, // Output forces
+    pub forces_x: Vec<f32>,
     pub forces_y: Vec<f32>,
     pub forces_z: Vec<f32>,
-    
     pub count: usize,
 }
 

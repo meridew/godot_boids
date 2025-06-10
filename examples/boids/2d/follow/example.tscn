@@ -21,8 +21,6 @@ _data = {
 point_count = 7
 
 [sub_resource type="FlockProperties" id="FlockProperties_id14j"]
-resource_local_to_scene = false
-resource_name = ""
 
 [sub_resource type="Environment" id="Environment_8ucif"]
 background_mode = 3
